@@ -1,0 +1,71 @@
+satellite.include(satellite)
+
+// quad.satl -- the main file of the quad ai.
+//
+// Shows quad's name and its version, revision and build, read from
+// version.text.c4. Every run raises the build number in that file by 1, so the
+// next run shows the next build. satl finds version.text.c4 next to this file,
+// wherever quad is run from.
+//
+// Run it: satl quad.satl
+
+// A number as text, with zeros in front up to `width` digits: pad(1, 4) is "0001".
+satellite.capsule pad(satellite.variable.number n, satellite.variable.number width)
+{
+    satellite.variable.string text = n.string
+    satellite.statement.while (text.size < width)
+    {
+        text = "0" + text
+    }
+    satellite.return(text)
+}
+
+// The number after `key` on its line of version.text.c4: "BUILD=" on BUILD=0001 is 1.
+satellite.capsule read_setting(satellite.variable.file settings, satellite.variable.string key)
+{
+    satellite.variable.number at = settings.search(key)
+    satellite.variable.string digits = settings[at] - key
+    satellite.return(digits.number)
+}
+
+satellite.capsule satellite.main()
+{
+    satellite.statement.if (satellite.file.exists("version.text.c4") == satellite.bool.false)
+    {
+        satellite.console.display("quad: version.text.c4 is missing -- it belongs next to quad.satl")
+        satellite.return(satellite)
+    }
+
+    satellite.variable.file settings = satellite.file.open("version.text.c4")
+    satellite.variable.number version_number = read_setting(settings, "VERSION=")
+    satellite.variable.number revision = read_setting(settings, "REVISION=")
+    satellite.variable.number build = read_setting(settings, "BUILD=")
+
+    // quad's version as a float: version 001 is 0.001.
+    satellite.variable.float quad_version = version_number
+    quad_version = quad_version / 1000
+
+    // Shown the way the file writes it: 0.001 back to 001.
+    satellite.variable.float version_scaled = quad_version * 1000
+    satellite.variable.string version_shown = pad(version_scaled.number, 3)
+
+    satellite.console.display("")
+    satellite.console.display("     #####    ##   ##    #####    ######  ")
+    satellite.console.display("    ##   ##   ##   ##   ##   ##   ##   ## ")
+    satellite.console.display("    ##   ##   ##   ##   #######   ##   ## ")
+    satellite.console.display("    ##  ###   ##   ##   ##   ##   ##   ## ")
+    satellite.console.display("     ######    #####    ##   ##   ######  ")
+    satellite.console.display("          ##                              ")
+    satellite.console.display("")
+    satellite.console.display("    THE QUAD AI")
+    satellite.console.display("    VERSION " + version_shown + " REVISION " + pad(revision, 2) + " BUILD " + pad(build, 4))
+    satellite.console.display("    ---------------------------------------")
+    satellite.console.display("")
+
+    // The next run is the next build.
+    satellite.variable.number next_build = build + 1
+    settings.replace(settings.search("BUILD="), "BUILD=" + pad(next_build, 4))
+    settings.close()
+
+    satellite.return(satellite)
+}
