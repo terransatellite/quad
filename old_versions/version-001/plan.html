@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The quad Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+:root{
+  --bg:#F3F6F8; --surface:#FFFFFF; --sunk:#E8EEF2; --line:#D3DDE4;
+  --ink:#15212B; --muted:#56687A; --faint:#8395A5;
+  --accent:#1D63A8; --accent-soft:#DCE9F6;
+  --decided:#1F7A4D; --decided-soft:#DCF1E5;
+  --proposed:#9A6412; --proposed-soft:#F8EBD3;
+  --blocked:#A33A3A; --blocked-soft:#F6E0DF;
+  --k-word:#1D63A8; --k-symbol:#6B4FB8; --k-quote:#9A6412; --k-ascii:#1F7A4D; --k-newline:#0E7C86; --k-semi:#A33A3A; --k-hole:#56687A;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F161C; --surface:#162029; --sunk:#1C2833; --line:#2A3947;
+    --ink:#E4ECF2; --muted:#9FB0BF; --faint:#6F8395;
+    --accent:#6FAEEA; --accent-soft:#1B3148;
+    --decided:#62C992; --decided-soft:#173526;
+    --proposed:#E3AE5A; --proposed-soft:#3A2D16;
+    --blocked:#E58A86; --blocked-soft:#3C1F1F;
+    --k-word:#6FAEEA; --k-symbol:#A993EE; --k-quote:#E3AE5A; --k-ascii:#62C992; --k-newline:#4FC3CC; --k-semi:#E58A86; --k-hole:#9FB0BF;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F161C; --surface:#162029; --sunk:#1C2833; --line:#2A3947;
+  --ink:#E4ECF2; --muted:#9FB0BF; --faint:#6F8395;
+  --accent:#6FAEEA; --accent-soft:#1B3148;
+  --decided:#62C992; --decided-soft:#173526;
+  --proposed:#E3AE5A; --proposed-soft:#3A2D16;
+  --blocked:#E58A86; --blocked-soft:#3C1F1F;
+  --k-word:#6FAEEA; --k-symbol:#A993EE; --k-quote:#E3AE5A; --k-ascii:#62C992; --k-newline:#4FC3CC; --k-semi:#E58A86; --k-hole:#9FB0BF;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.6;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 80px;display:grid;grid-template-columns:210px minmax(0,1fr);gap:48px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13.5px}
+nav.toc .lbl{font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:11.5px;color:var(--faint);margin-bottom:8px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:t}
+nav.toc a{display:flex;gap:8px;color:var(--muted);text-decoration:none;padding:4px 8px;border-radius:5px}
+nav.toc a:hover,nav.toc a:focus-visible{background:var(--sunk);color:var(--ink);outline:none}
+nav.toc a span{font-family:var(--mono);color:var(--faint);font-size:12px;min-width:1.4em}
+main{min-width:0;display:grid;gap:56px}
+h1,h2,h3{font-family:var(--cond);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(34px,5vw,50px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:28px;font-weight:600;display:flex;align-items:baseline;gap:12px}
+h2 .n{font-family:var(--mono);font-size:14px;color:var(--faint);font-weight:500}
+h3{font-size:18.5px;font-weight:600}
+p{margin:0;max-width:68ch}
+.muted{color:var(--muted)}
+section{display:grid;gap:18px;scroll-margin-top:24px}
+code,.mono{font-family:var(--mono);font-size:.9em}
+p code,li code,td code{background:var(--sunk);padding:1px 5px;border-radius:4px}
+.eyebrow{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:12.5px;color:var(--accent);font-weight:600}
+header.top{display:grid;gap:14px;padding-bottom:8px}
+.lead{font-size:18px;max-width:62ch;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted);align-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.pill.decided{background:var(--decided-soft);color:var(--decided)}
+.pill.proposed{background:var(--proposed-soft);color:var(--proposed)}
+.pill.done{background:var(--decided);color:var(--surface)}
+.pill.blocked{background:var(--blocked-soft);color:var(--blocked)}
+.pill.open{background:var(--accent-soft);color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px 22px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+ul.clean{margin:0;padding-left:1.1em;display:grid;gap:6px}
+.scroll{overflow-x:auto}
+pre{margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.55;background:var(--sunk);border-radius:8px;padding:14px 16px;overflow-x:auto;color:var(--ink)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--cond);font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:var(--muted)}
+td:first-child{white-space:nowrap}
+
+/* decided vs proposed */
+.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.split .card{display:grid;gap:12px;align-content:start}
+.split .card.d{border-top:3px solid var(--decided)}
+.split .card.p{border-top:3px solid var(--proposed)}
+
+/* token strip */
+.strip{display:flex;flex-wrap:wrap;gap:6px;align-items:stretch}
+.tok{display:grid;gap:4px;justify-items:center;min-width:64px;padding:10px 10px 8px;border-radius:8px;background:var(--surface);border:1px solid var(--line);border-bottom:3px solid var(--kc)}
+.tok b{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--ink);white-space:pre}
+.tok i{font-style:normal;font-family:var(--cond);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--kc)}
+.tok small{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+.tok.semi{background:var(--blocked-soft)}
+.k-word{--kc:var(--k-word)} .k-symbol{--kc:var(--k-symbol)} .k-quote{--kc:var(--k-quote)} .k-ascii{--kc:var(--k-ascii)} .k-newline{--kc:var(--k-newline)} .k-semi{--kc:var(--k-semi)} .k-hole{--kc:var(--k-hole)}
+
+/* anatomy */
+.anatomy{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.part{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:4px;align-content:start}
+.part .h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.part .nm{font-family:var(--mono);font-weight:600;font-size:13.5px}
+.part p{font-size:13.5px;color:var(--muted)}
+.part.yours{border-color:var(--decided)}
+
+/* classes */
+.classes{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.cls{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--kc);border-radius:6px;padding:10px 12px;display:grid;gap:2px}
+.cls .nm{font-family:var(--mono);font-weight:600;font-size:14px}
+.cls p{font-size:13.5px;color:var(--muted)}
+
+/* flow */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;counter-reset:f}
+.step{position:relative;padding:14px 16px 14px 14px;background:var(--surface);border:1px solid var(--line);margin-right:14px;border-radius:8px;display:grid;gap:4px;align-content:start}
+.step:not(:last-child)::after{content:"";position:absolute;right:-13px;top:50%;width:12px;height:2px;background:var(--faint)}
+.step .t{font-family:var(--cond);font-weight:600;font-size:15px}
+.step p{font-size:13px;color:var(--muted)}
+.step .who{font-family:var(--mono);font-size:11px;color:var(--faint)}
+.step.you{background:var(--proposed-soft);border-color:var(--proposed)}
+.flowrow{display:grid;gap:14px}
+
+/* worked example */
+.walk{display:grid;gap:0;counter-reset:w}
+.walk li{list-style:none;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.walk li::before{counter-increment:w;content:counter(w);font-family:var(--mono);font-size:12px;color:var(--accent);background:var(--accent-soft);border-radius:50%;width:26px;height:26px;display:grid;place-items:center}
+.walk ol{margin:0;padding:0}
+.draft{font-family:var(--mono);font-size:13px;color:var(--muted);display:block;margin-top:4px;overflow-x:auto;white-space:pre}
+.draft .h{color:var(--k-hole);background:var(--sunk);border-radius:3px;padding:0 3px}
+.draft .new{color:var(--k-ascii);font-weight:600}
+
+/* roadmap */
+.road{display:grid;gap:0;position:relative}
+.ms{display:grid;grid-template-columns:78px minmax(0,1fr);gap:18px;position:relative;padding-bottom:22px}
+.ms::before{content:"";position:absolute;left:38px;top:34px;bottom:0;width:2px;background:var(--line)}
+.ms:last-child::before{display:none}
+.ms .id{font-family:var(--cond);font-weight:700;font-size:22px;width:78px;height:34px;display:grid;place-items:center;border-radius:6px;background:var(--surface);border:1px solid var(--line);position:relative;z-index:1}
+.ms.done .id{background:var(--decided);color:var(--surface);border-color:var(--decided)}
+.ms .body{display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.ms .hd{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.ms .hd h3{font-size:18px}
+.dw{border-left:3px solid var(--decided);background:var(--decided-soft);padding:8px 12px;border-radius:0 6px 6px 0;font-size:14px;display:grid;gap:4px}
+.dw .l{font-family:var(--cond);font-weight:600;text-transform:uppercase;letter-spacing:.07em;font-size:11.5px;color:var(--decided)}
+.dw ul{margin:0;padding-left:1.1em}
+.phase{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--faint);padding:0 0 14px 96px;font-weight:600}
+
+/* loop */
+.loop{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--cond);font-weight:600;font-size:15px}
+.loop span.b{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 14px}
+.loop span.a{color:var(--faint);font-family:var(--mono)}
+.loop span.b.hot{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.invent{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.invent .card{padding:14px 16px;display:grid;gap:6px;align-content:start}
+.invent .card .tag{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.invent .card p{font-size:14px;color:var(--muted)}
+
+.qs{display:grid;gap:10px;counter-reset:q}
+.q{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.q::before{counter-increment:q;content:counter(q);font-family:var(--cond);font-weight:700;font-size:20px;color:var(--accent)}
+.q .qq{font-weight:600}
+.q .rec{font-size:14px;color:var(--muted);margin-top:4px}
+.q .rec b{color:var(--decided);font-weight:600}
+
+.note{border-left:3px solid var(--blocked);background:var(--blocked-soft);padding:12px 16px;border-radius:0 8px 8px 0;display:grid;gap:4px;font-size:14.5px}
+.note .l{font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:12px;color:var(--blocked)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+
+@media (max-width:960px){
+  .wrap{grid-template-columns:minmax(0,1fr);gap:28px}
+  nav.toc{position:static}
+  nav.toc ol{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .flow{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .step{margin-right:0}
+  .step::after{display:none}
+  .anatomy{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .invent{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:640px){
+  .split,.grid2{grid-template-columns:minmax(0,1fr)}
+  .anatomy{grid-template-columns:minmax(0,1fr)}
+  .flow{grid-template-columns:minmax(0,1fr)}
+  .ms{grid-template-columns:minmax(0,1fr);gap:8px}
+  .ms::before{display:none}
+  .phase{padding-left:0}
+  td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<nav class="toc" aria-label="Sections">
+  <div class="lbl">The quad plan</div>
+  <ol>
+    <li><a href="#vision"><span>1</span>What quad is</a></li>
+    <li><a href="#property"><span>2</span>What a property holds</a></li>
+    <li><a href="#objects"><span>3</span>The objects</a></li>
+    <li><a href="#example"><span>4</span>One property</a></li>
+    <li><a href="#writes"><span>5</span>How quad writes</a></li>
+    <li><a href="#first"><span>6</span>The first program</a></li>
+    <li><a href="#roadmap"><span>7</span>Milestones</a></li>
+    <li><a href="#living"><span>8</span>The living part</a></li>
+    <li><a href="#gaps"><span>9</span>Satellite gaps</a></li>
+    <li><a href="#questions"><span>10</span>Your decisions</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="top">
+  <div class="eyebrow">terransatellite/quad · plan as of 2026-09-26</div>
+  <h1>The quad plan</h1>
+  <p class="lead">quad is an AI written in satellite. It writes C++ first and satellite later. It keeps everything it knows as <em>properties</em>, looks through them to write its own programs, and later learns to define new ones itself.</p>
+  <div class="legend">
+    <span class="pill decided">Decided</span> you said it
+    <span class="pill proposed">Proposed</span> the design panel's suggestion, waiting on you
+    <span class="pill done">Done</span> built and running
+    <span class="pill blocked">Blocked</span> satellite can't do it yet
+  </div>
+</header>
+
+<!-- 1 -->
+<section id="vision">
+  <h2><span class="n">01</span>What quad is</h2>
+  <div class="grid2">
+    <div class="card" style="display:grid;gap:10px">
+      <h3>The idea <span class="pill decided">Decided</span></h3>
+      <ul class="clean">
+        <li>quad is written in <b>satellite</b> (<code>.satl</code>) and writes <b>C++</b> first, then satellite.</li>
+        <li>C++ comes first because it is finished: g++ can check every program quad writes.</li>
+        <li>Knowledge is held as <b>properties</b> with dotted names, e.g. <code>cxx.namespace.std.cout.string</code>.</li>
+        <li>quad flips through its properties and writes its own programs that way.</li>
+        <li>Later it can define new properties. That is the step that makes it "like a living, thinking AI".</li>
+      </ul>
+    </div>
+    <div class="card" style="display:grid;gap:10px">
+      <h3>Files <span class="pill decided">Decided</span></h3>
+      <ul class="clean">
+        <li>Every quad file ends in <code>.c4</code>. A text file ends in <code>.text.c4</code>.</li>
+        <li><code>version.text.c4</code> holds <code>VERSION=001</code>, <code>REVISION=01</code>, <code>BUILD=0001</code>.</li>
+      </ul>
+      <h3 style="margin-top:6px">Files quad adds <span class="pill proposed">Proposed</span></h3>
+      <ul class="clean">
+        <li><code>properties.text.c4</code>: every property</li>
+        <li><code>goal.text.c4</code>: the lines the program must print</li>
+        <li><code>program.cxx.c4</code>: the C++ quad writes</li>
+        <li><code>program.expected.text.c4</code>: what quad predicts it prints</li>
+        <li><code>program.errors.text.c4</code>, <code>program.output.text.c4</code>: written by the compile line</li>
+        <li><code>grammar.text.c4</code>: what may follow what (M8)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="property">
+  <h2><span class="n">02</span>What a property holds</h2>
+  <div class="split">
+    <div class="card d">
+      <span class="pill decided">Decided</span>
+      <ul class="clean">
+        <li>Every piece of C++ is its own object.</li>
+        <li>The semicolon ends every command. It is a special class, a special type of object.</li>
+        <li>The objects are held in a <code>satellite.container.multiple&lt;every object type&gt;</code>.</li>
+        <li>Properties have dotted names.</li>
+        <li>The definition is not complete yet.</li>
+      </ul>
+    </div>
+    <div class="card p">
+      <span class="pill proposed">Proposed</span>
+      <ul class="clean">
+        <li>A <code>multiple</code> holds <b>one</b> value at a time (tested: a list of two is refused, S301). So each <em>position</em> is your multiple, and a list keeps them in order.</li>
+        <li>Every object class extends one base class, <code>piece</code>.</li>
+        <li>Using a property never changes it. Programs are built in a separate <em>draft</em>.</li>
+        <li>Properties are data in <code>properties.text.c4</code>. Satellite can't load new code while it runs, so data is how quad grows.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="scroll"><pre>satellite.container.list&lt;satellite.container.multiple&lt;word, symbol, header, open_quote, ascii, close_quote, newline, semicolon, hole&gt;&gt; objects</pre></div>
+  <h3>The eight parts of a complete property</h3>
+  <p class="muted">Without parts 3 to 6, quad can only glue objects together blindly. Your one <code>cout</code> line alone has about 43 million arrangements, and almost none compile.</p>
+  <div class="anatomy">
+    <div class="part yours"><div class="h"><span class="nm">NAME</span><span class="pill decided">yours</span></div><p>The dotted name. How you and quad refer to it.</p></div>
+    <div class="part yours"><div class="h"><span class="nm">OBJECTS</span><span class="pill decided">yours</span></div><p>The C++ itself, one object per position, in order.</p></div>
+    <div class="part"><div class="h"><span class="nm">PLACE</span><span class="pill proposed">new</span></div><p>Where it may go: <code>root</code>, <code>include</code>, <code>function</code>, <code>command</code>, <code>cout_item</code>.</p></div>
+    <div class="part"><div class="h"><span class="nm">HOLES</span><span class="pill proposed">new</span></div><p>Gaps inside it, each naming the PLACE it takes and how many fillers.</p></div>
+    <div class="part"><div class="h"><span class="nm">NEEDS</span><span class="pill proposed">new</span></div><p>What else the file must hold. <code>std::cout</code> needs <code>#include &lt;iostream&gt;</code>.</p></div>
+    <div class="part"><div class="h"><span class="nm">DOES</span><span class="pill proposed">new</span></div><p>What it prints: <code>ascii</code>, <code>number</code>, <code>line_end</code>, <code>holes</code>, <code>nothing</code>.</p></div>
+    <div class="part"><div class="h"><span class="nm">RECORD</span><span class="pill proposed">new</span></div><p><code>TRIED</code>, <code>PASSED</code>, and <code>FAILED=</code> with g++'s first error line.</p></div>
+    <div class="part"><div class="h"><span class="nm">STATUS · ORIGIN</span><span class="pill proposed">new</span></div><p>seed, untested, proven, broken. Made by you or by quad, and <code>MADE_OF</code> which parents.</p></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="objects">
+  <h2><span class="n">03</span>The objects</h2>
+  <p class="muted">Every class extends <code>piece</code>, which holds the text, the kind, and the gap written in front. All of them answer <code>call_text()</code>, <code>call_kind()</code> and <code>call_ends_command()</code>. <span class="pill proposed">Proposed</span></p>
+  <div class="classes">
+    <div class="cls k-word"><span class="nm">word</span><p><code>std::cout</code> <code>int</code> <code>main</code> <code>return</code> <code>0</code> <code>#include</code></p></div>
+    <div class="cls k-symbol"><span class="nm">symbol</span><p><code>&lt;&lt;</code> <code>(</code> <code>)</code> <code>{</code> <code>}</code></p></div>
+    <div class="cls k-word"><span class="nm">header</span><p><code>&lt;iostream&gt;</code> as one object. Spaced out, g++ fails.</p></div>
+    <div class="cls k-quote"><span class="nm">open_quote · close_quote</span><p>The same <code>"</code> in two classes, because different things follow each.</p></div>
+    <div class="cls k-ascii"><span class="nm">ascii</span><p>The text between quotes. Empty in a property, filled in the draft. No <code>"</code>, <code>\</code> or line break.</p></div>
+    <div class="cls k-newline"><span class="nm">newline</span><p><code>"\n"</code> as one object of four characters, as you wrote it.</p></div>
+    <div class="cls k-word"><span class="nm">number</span><p>Digits. Arrives in M7.</p></div>
+    <div class="cls k-hole"><span class="nm">hole</span><p>A gap. Names the PLACE it takes, plus least and most fillers.</p></div>
+    <div class="cls k-semi"><span class="nm">semicolon</span><p>The special class. The only one whose <code>call_ends_command()</code> is true.</p></div>
+  </div>
+  <div class="card" style="display:grid;gap:10px">
+    <h3>Why the semicolon is special</h3>
+    <ul class="clean">
+      <li>quad counts commands by asking every object <code>call_ends_command()</code>. Only the semicolon says yes.</li>
+      <li>A <code>command</code> property must end in exactly one semicolon. quad refuses to load one that doesn't.</li>
+      <li>It is the joint between commands: the one point where the writer steps back out to choose what comes next, and starts a new line.</li>
+      <li>Later it is the knife: quad cuts C++ it reads into commands at each semicolon.</li>
+      <li>It ends <b>commands</b>, not lines. <code>#include</code> lines end at the line end, <code>}</code> ends a block, and the two <code>;</code> in <code>for ( ; ; )</code> will need their own class.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="example">
+  <h2><span class="n">04</span>One property, broken into its objects</h2>
+  <p class="muted">Your line <code>std::cout &lt;&lt; "hi" &lt;&lt; "\n";</code> is exactly 8 objects. Checked in satl: the M2 classes print this line and <code>8 objects, 1 ends a command</code>.</p>
+  <div class="strip" role="list">
+    <div class="tok k-word" role="listitem"><b>std::cout</b><i>word</i><small>1</small></div>
+    <div class="tok k-symbol" role="listitem"><b>&lt;&lt;</b><i>symbol</i><small>2</small></div>
+    <div class="tok k-quote" role="listitem"><b>"</b><i>open_quote</i><small>3</small></div>
+    <div class="tok k-ascii" role="listitem"><b>hi</b><i>ascii</i><small>4</small></div>
+    <div class="tok k-quote" role="listitem"><b>"</b><i>close_quote</i><small>5</small></div>
+    <div class="tok k-symbol" role="listitem"><b>&lt;&lt;</b><i>symbol</i><small>6</small></div>
+    <div class="tok k-newline" role="listitem"><b>"\n"</b><i>newline</i><small>7</small></div>
+    <div class="tok k-semi semi" role="listitem"><b>;</b><i>semicolon</i><small>8</small></div>
+  </div>
+  <p>Your dotted names already are the <b>grammar</b> (the rules for which pieces may go where): <code>cxx.namespace.std.cout</code> is a command with a gap for cout items, and <code>.string</code>, <code>.newline</code> and <code>.number</code> are what may fill that gap.</p>
+  <div class="grid2">
+    <div style="display:grid;gap:8px;min-width:0">
+      <h3>In <code>properties.text.c4</code> <span class="pill proposed">Proposed</span></h3>
+<pre>PROPERTY=cxx.namespace.std.cout
+PLACE=command
+NEEDS=cxx.include.iostream
+DOES=holes
+OBJECT=word std::cout
+OBJECT=hole cout_item 1 0
+OBJECT=semicolon
+ORIGIN=author
+STATUS=seed
+END
+PROPERTY=cxx.namespace.std.cout.string
+PLACE=cout_item
+DOES=ascii
+OBJECT=symbol &lt;&lt;
+OBJECT=open_quote
+OBJECT=ascii
+OBJECT=close_quote
+END
+PROPERTY=cxx.namespace.std.cout.newline
+PLACE=cout_item
+DOES=line_end
+OBJECT=symbol &lt;&lt;
+OBJECT=newline
+END</pre>
+    </div>
+    <div style="display:grid;gap:8px;align-content:start;min-width:0">
+      <h3>The six seed properties</h3>
+      <div class="scroll"><table>
+        <tr><th>property</th><th>place</th><th>objects</th></tr>
+        <tr><td><code>cxx.program</code></td><td>root</td><td class="mono">[include 0..] [function 1]</td></tr>
+        <tr><td><code>cxx.include.iostream</code></td><td>include</td><td class="mono">#include &lt;iostream&gt;</td></tr>
+        <tr><td><code>…no_forward_declaration.main</code></td><td>function</td><td class="mono">int main ( ) { [command 0..] return 0 ; }</td></tr>
+        <tr><td><code>cxx.namespace.std.cout</code></td><td>command</td><td class="mono">std::cout [cout_item 1..] ;</td></tr>
+        <tr><td><code>…cout.string</code></td><td>cout_item</td><td class="mono">&lt;&lt; " [ascii] "</td></tr>
+        <tr><td><code>…cout.newline</code></td><td>cout_item</td><td class="mono">&lt;&lt; "\n"</td></tr>
+      </table></div>
+      <p class="muted" style="font-size:13.5px"><code>hole cout_item 1 0</code> means: takes cout items, at least 1, no upper limit.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="writes">
+  <h2><span class="n">05</span>How quad writes C++</h2>
+  <p class="muted">Each <code>satl quad.satl</code> run is one <b>turn</b>. The compile happens between turns, because satellite can't start g++ (tested: <code>satellite.system.run</code> gives S110). <span class="pill proposed">Proposed</span></p>
+  <div class="flowrow">
+    <div class="flow">
+      <div class="step"><span class="who">quad</span><span class="t">Read the goal</span><p><code>goal.text.c4</code>: the lines to print. That is what's "wanted".</p></div>
+      <div class="step"><span class="who">quad</span><span class="t">Start a draft</span><p>Copy <code>cxx.program</code>'s objects into a new list.</p></div>
+      <div class="step"><span class="who">quad</span><span class="t">Flip through</span><p>At each hole, keep properties whose PLACE fits and whose DOES makes what's wanted. Pick one.</p></div>
+      <div class="step"><span class="who">quad</span><span class="t">Splice &amp; nest</span><p>Put its objects where the hole was, then fill their holes too. NEEDS fill includes last.</p></div>
+      <div class="step"><span class="who">quad</span><span class="t">Shape check &amp; write</span><p>No holes left, brackets balance, commands end in <code>;</code>. Write <code>program.cxx.c4</code> and the prediction.</p></div>
+    </div>
+    <div class="flow">
+      <div class="step you"><span class="who">you, for now</span><span class="t">Compile &amp; run</span><p>One g++ line (below). Moves to quad when satellite can run programs.</p></div>
+      <div class="step"><span class="who">quad, next turn</span><span class="t">Gate 1 · Shape</span><p>Already passed before writing.</p></div>
+      <div class="step"><span class="who">quad, next turn</span><span class="t">Gate 2 · Compiler</span><p>g++ with <code>-Wall -Wextra</code> must print nothing.</p></div>
+      <div class="step"><span class="who">quad, next turn</span><span class="t">Gate 3 · Behaviour</span><p>Output equals the prediction and the goal, byte for byte.</p></div>
+      <div class="step"><span class="who">quad, next turn</span><span class="t">Record</span><p>PASS or FAIL goes on every property used. After the first PASS, at most one unproven property per program, so a failure names its cause.</p></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card" style="display:grid;gap:8px">
+      <h3>When several properties fit, prefer</h3>
+      <ol style="margin:0;padding-left:1.2em;display:grid;gap:3px">
+        <li>proven over untested</li>
+        <li>the one whose DOES covers more of what's wanted</li>
+        <li>the narrower one (number before ascii)</li>
+        <li>the better record</li>
+        <li>fewer objects</li>
+      </ol>
+      <p class="muted" style="font-size:14px">If nothing fits, quad says which hole it couldn't fill. That is its honest "I don't know how yet".</p>
+    </div>
+    <div style="display:grid;gap:8px;min-width:0;align-content:start">
+      <h3>The compile line</h3>
+<pre>rm -f program program.output.text.c4
+g++ -std=c++17 -Wall -Wextra -x c++ -o program program.cxx.c4 \
+  2&gt; program.errors.text.c4 &amp;&amp; timeout 5 ./program &gt; program.output.text.c4</pre>
+      <p class="muted" style="font-size:13.5px">The <code>rm</code> stops an old program from answering when a new one fails to compile.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="first">
+  <h2><span class="n">06</span>quad's first program, step by step</h2>
+  <p class="muted">Goal: <code>hi</code>. Grey boxes are holes. Green is what quad just filled in.</p>
+  <div class="grid2">
+  <ol class="walk">
+    <li><div><b>Start</b> from <code>cxx.program</code>.<span class="draft"><span class="h">[include 0..]</span> <span class="h">[function 1]</span></span></div></li>
+    <li><div><b>Include hole:</b> left for last.</div></li>
+    <li><div><b>Function hole:</b> only <code>main</code> has PLACE=function.<span class="draft"><span class="h">[include]</span> <span class="new">int main ( ) {</span> <span class="h">[command 0..]</span> <span class="new">return 0 ; }</span></span></div></li>
+    <li><div><b>Command hole:</b> the only command is <code>std::cout</code>. Note: it NEEDS iostream.<span class="draft">{ <span class="new">std::cout</span> <span class="h">[cout_item 1..]</span> <span class="new">;</span> <span class="h">[command 0..]</span> return 0 ; }</span></div></li>
+    <li><div><b>cout item:</b> wanted starts with text → <code>.string</code>, filled with <code>hi</code>.<span class="draft">std::cout <span class="new">&lt;&lt; "hi"</span> <span class="h">[cout_item]</span> ;</span></div></li>
+    <li><div><b>cout item:</b> wanted is a line end → <code>.newline</code>.<span class="draft">std::cout &lt;&lt; "hi" <span class="new">&lt;&lt; "\n"</span> ;</span></div></li>
+    <li><div><b>Holes close:</b> nothing more is wanted.</div></li>
+    <li><div><b>Include hole</b> takes what was needed: <code>#include &lt;iostream&gt;</code>.</div></li>
+    <li><div><b>Shape check</b> passes: 19 objects, 2 end a command.</div></li>
+  </ol>
+  <div style="display:grid;gap:12px;align-content:start;min-width:0">
+    <h3>quad writes <code>program.cxx.c4</code></h3>
+<pre>#include &lt;iostream&gt;
+int main() {
+    std::cout &lt;&lt; "hi" &lt;&lt; "\n";
+    return 0;
+}</pre>
+    <div class="card" style="display:grid;gap:6px">
+      <p><b>You compile.</b> g++ prints nothing. The program prints <code>hi</code>. <span class="muted">(Checked here with g++ 13.3.)</span></p>
+      <p><b>Next turn</b> quad shows <code>PASS</code>, and all six properties become proven.</p>
+    </div>
+    <div class="card" style="display:grid;gap:6px">
+      <h3>Two more goals</h3>
+      <p>Lines <code>one</code> and <code>two</code> → <code>std::cout &lt;&lt; "one" &lt;&lt; "\n" &lt;&lt; "two" &lt;&lt; "\n";</code></p>
+      <p><code>say "hi"</code> → refused: "no property I know prints a quote". Nothing is written.</p>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="roadmap">
+  <h2><span class="n">07</span>Milestones</h2>
+  <p class="muted">Each one is small and ends with something <code>satl quad.satl</code> shows. None of M2 to M10 is blocked by satellite; you type the compile line from M4 on.</p>
+  <div class="road">
+    <div class="phase">Foundation</div>
+    <div class="ms done"><div class="id">M1</div><div class="body">
+      <div class="hd"><h3>quad starts</h3><span class="pill done">Done</span></div>
+      <p>ASCII-art name plus version, revision and build from <code>version.text.c4</code>. Every run raises BUILD by 1.</p>
+    </div></div>
+    <div class="ms"><div class="id">M2</div><div class="body">
+      <div class="hd"><h3>The objects</h3><span class="pill proposed">Proposed · tested</span></div>
+      <p>Base class <code>piece</code> and the nine classes, including the special <code>semicolon</code>. quad builds your 8 objects by hand into a list of multiples.</p>
+      <div class="dw"><span class="l">Done when</span><span><code>std::cout &lt;&lt; "hi" &lt;&lt; "\n";</code> and <code>8 objects, 1 ends a command</code>. The 1 is counted, not typed.</span></div>
+    </div></div>
+    <div class="ms"><div class="id">M3</div><div class="body">
+      <div class="hd"><h3>The property class, read from a file</h3><span class="pill proposed">Proposed</span></div>
+      <p><code>property</code> with NAME, PLACE, DOES, NEEDS, OBJECTS. The six seeds in <code>properties.text.c4</code>, loaded at every start, with the semicolon rule checked.</p>
+      <div class="dw"><span class="l">Done when</span><span><code>quad knows 6 properties</code>, one line each. A command typed without its semicolon is refused and the count stays 6.</span></div>
+    </div></div>
+    <div class="phase">Writing</div>
+    <div class="ms"><div class="id">M4</div><div class="body">
+      <div class="hd"><h3>The first program, by fixed steps</h3><span class="pill proposed">Proposed</span></div>
+      <p>The draft, splicing, the NEEDS pass, the shape check, the writer. Choices are fixed in code for now.</p>
+      <div class="dw"><span class="l">Done when</span><span><code>wrote program.cxx.c4: 19 objects, 2 commands</code>. It compiles cleanly and prints <code>hi</code>. A second run rewrites the file.</span></div>
+    </div></div>
+    <div class="ms"><div class="id">M5</div><div class="body">
+      <div class="hd"><h3>Flipping through, toward a goal</h3><span class="pill proposed">Proposed</span></div>
+      <p>The fixed choices go. quad chooses at every hole from <code>goal.text.c4</code> and writes its prediction.</p>
+      <div class="dw"><span class="l">Done when</span><ul><li>goal <code>hi</code> shows its four choices and gives the M4 program</li><li><code>one</code> + <code>two</code> give one chained command</li><li><code>say "hi"</code> is refused and nothing is written</li></ul></div>
+    </div></div>
+    <div class="phase">Judging</div>
+    <div class="ms"><div class="id">M6</div><div class="body">
+      <div class="hd"><h3>quad judges its program</h3><span class="pill proposed">Proposed</span></div>
+      <p>TRIED, PASSED, FAILED= on every property. quad judges the waiting program at every start.</p>
+      <div class="dw"><span class="l">Done when</span><span>run → compile → run shows <code>PASS</code> and <code>TRIED=1 PASSED=1</code> on all six. With <code>std::cuot</code> typed in, it shows <code>FAIL: did not compile</code> and g++'s error.</span></div>
+    </div></div>
+    <div class="ms"><div class="id">M7</div><div class="body">
+      <div class="hd"><h3>Every property proves itself</h3><span class="pill proposed">Proposed</span></div>
+      <p>STATUS and ORIGIN. One unproven property per program. With no goal, quad tests the next unproven property. New seed: <code>number</code> and <code>cxx.namespace.std.cout.number</code>.</p>
+      <div class="dw"><span class="l">Done when</span><ul><li>empty goal shows <code>testing cxx.namespace.std.cout.number</code>, then STATUS=proven</li><li>goal <code>42</code> picks <code>.number</code></li><li>a property typed wrong ends STATUS=broken</li></ul></div>
+    </div></div>
+    <div class="ms"><div class="id">M8</div><div class="body">
+      <div class="hd"><h3>quad works out its grammar</h3><span class="pill proposed">Proposed</span></div>
+      <p>From PLACE and holes, using proven properties only, quad works out what may follow each object and writes <code>grammar.text.c4</code>.</p>
+      <div class="dw"><span class="l">Done when</span><span>the file holds <code>std::cout -&gt; &lt;&lt;</code>, <code>&lt;&lt; -&gt; "\n"</code>, <code>; -&gt; }</code>, <code>{ -&gt; return</code>. A quote straight after std::cout is flagged <code>new pair, not proven</code>.</span></div>
+    </div></div>
+    <div class="phase">Growing</div>
+    <div class="ms"><div class="id">M9</div><div class="body">
+      <div class="hd"><h3>The first property quad defines</h3><span class="pill proposed">Proposed</span></div>
+      <p>After <code>.string</code> then <code>.newline</code> pass side by side, quad saves them as one: <code>cxx.namespace.std.cout.string.newline</code>, ORIGIN=quad. It must pass the grammar guard and its own test.</p>
+      <div class="dw"><span class="l">Done when</span><span>a block nobody typed appears, becomes proven, and goal <code>hello</code> picks it.</span></div>
+    </div></div>
+    <div class="ms"><div class="id">M10</div><div class="body">
+      <div class="hd"><h3>Functions quad names itself</h3><span class="pill proposed">Proposed</span></div>
+      <p>You add two seed shapes (a void function, a call). quad wraps a proven body in a function it names, then moves it after <code>main</code> with a forward declaration.</p>
+      <div class="dw"><span class="l">Done when</span><span><code>cxx.function.no_forward_declaration.say_0001</code> and <code>cxx.function.forward_declaration.say_0001</code> exist with ORIGIN=quad, and both programs pass.</span></div>
+    </div></div>
+    <div class="phase">Later, not yet milestones</div>
+    <div class="ms"><div class="id">…</div><div class="body">
+      <ul class="clean"><li>Learn NEEDS from g++'s "not declared" errors</li><li>Drop one object or need and see if the program still passes</li><li>Swap objects of the same class and learn DOES from the output</li><li>Cut real C++ into objects and commands at each semicolon</li><li>quad sets its own goals</li></ul>
+    </div></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="living">
+  <h2><span class="n">08</span>The living part</h2>
+  <div class="loop" aria-label="quad's loop">
+    <span class="b">want</span><span class="a">→</span><span class="b hot">flip through properties</span><span class="a">→</span><span class="b">write</span><span class="a">→</span><span class="b">compile</span><span class="a">→</span><span class="b">run</span><span class="a">→</span><span class="b">compare</span><span class="a">→</span><span class="b">keep or drop</span><span class="a">→</span><span class="b hot">new properties, new goals</span><span class="a">↺</span>
+  </div>
+  <p class="muted">Every property quad invents starts untested. It must pass the grammar guard, then a test program in which it is the only unproven property.</p>
+  <div class="invent">
+    <div class="card"><span class="tag">M7 · proving</span><h3>Test everything</h3><p>With no goal, quad flips through every property and tests the next unproven one.</p></div>
+    <div class="card"><span class="tag">M9 · joining</span><h3>Remember what worked</h3><p>Two properties that passed side by side become one. A shortcut, not a new ability.</p></div>
+    <div class="card"><span class="tag">M10 · wrapping</span><h3>Name its own functions</h3><p>Put working code in a function, then move it behind a forward declaration.</p></div>
+    <div class="card"><span class="tag">later · experiment</span><h3>Drop and swap</h3><p>Remove a need or an object, swap <code>std::cout</code> for <code>std::cerr</code>, and learn from what happens.</p></div>
+    <div class="card"><span class="tag">later · reading</span><h3>Read real C++</h3><p><code>int x = 5;</code> and <code>int y = 7;</code> become <code>int [name] = [number] ;</code>.</p></div>
+    <div class="card"><span class="tag">later · goals</span><h3>Set its own goals</h3><p>"Test every untested property", "use two proven properties never used together".</p></div>
+  </div>
+  <div class="card" style="display:grid;gap:8px">
+    <h3>What this is, and what it isn't</h3>
+    <p>quad's store grows, and everything in it has earned its place by passing g++ and a run. That is real learning in a narrow sense. It is search plus testing: quad only grows through the ways of inventing you give it, it judges programs only by what they print, and it can't run without a person until satellite can start g++. Programs it writes should run only in quad's own folder, with the time limit, never as root.</p>
+  </div>
+</section>
+
+<!-- 9 -->
+<section id="gaps">
+  <h2><span class="n">09</span>Satellite gaps</h2>
+  <p class="muted">Checked on satl 004, revision 08, build 0103.</p>
+  <div class="note"><span class="l">The one that matters</span><span>Satellite can't run another program (<code>satellite.system.run</code> → S110). It blocks only the unattended loop. The fix to ask for: <code>satellite.system.run(command)</code>, answering the exit code and output.</span></div>
+  <div class="scroll"><table>
+    <tr><th>missing</th><th>what quad does instead</th></tr>
+    <tr><td>calling a capsule on a multiple of 2+ spacesuits</td><td>reach objects as <code>objects[i]</code> or through a <code>piece</code> name</td></tr>
+    <tr><td>asking which type a value holds</td><td>every object answers <code>call_kind()</code></td></tr>
+    <tr><td>a short name for a long type</td><td>spell the long type out</td></tr>
+    <tr><td>making or listing folders</td><td>one properties file, next to <code>quad.satl</code></td></tr>
+    <tr><td>deleting a file</td><td>clear it, then open it again</td></tr>
+    <tr><td>try / catch</td><td>check with <code>contains()</code> before <code>find()</code></td></tr>
+    <tr><td><code>&amp;&amp;</code> and <code>||</code></td><td>nested ifs</td></tr>
+    <tr><td>command-line arguments</td><td><code>goal.text.c4</code></td></tr>
+    <tr><td>a name declared twice in one capsule (S202)</td><td>declare temporaries once, at the top</td></tr>
+    <tr><td>making an object inside an expression</td><td><code>word w("std::cout")</code> on its own line</td></tr>
+    <tr><td>a base constructor with arguments</td><td><code>piece</code> takes none</td></tr>
+  </table></div>
+  <p class="muted" style="font-size:14px">No longer missing: including other files, break and continue, and the string methods <code>.at</code>, <code>.substring</code>, <code>.split</code>, <code>.contains</code>, <code>.starts_with</code>.</p>
+</section>
+
+<!-- 10 -->
+<section id="questions">
+  <h2><span class="n">10</span>Decisions only you can make</h2>
+  <div class="qs">
+    <div class="q"><div><div class="qq">Is a list of multiples okay as your "held in a multiple"?</div><div class="rec"><b>Recommended: yes.</b> Each position is your multiple; the list gives the order. <code>list&lt;piece&gt;</code> also works but loses the closed list of object types.</div></div></div>
+    <div class="q"><div><div class="qq">What is the C++ file called?</div><div class="rec"><b>Recommended: <code>program.cxx.c4</code></b>, keeping your <code>.c4</code> rule. g++ reads it with <code>-x c++</code>. The alternative is <code>program.cpp</code> as a named exception.</div></div></div>
+    <div class="q"><div><div class="qq">Do compiler warnings count as failure?</div><div class="rec"><b>Recommended: yes.</b> Any message from g++ is a FAIL, so quad never learns habits the compiler complains about.</div></div></div>
+    <div class="q"><div><div class="qq">Who runs g++ between turns?</div><div class="rec"><b>Recommended: you, by hand, through M5.</b> Save it as a <code>check.sh</code> only when typing gets tiresome. Ask satellite for <code>satellite.system.run</code>.</div></div></div>
+    <div class="q"><div><div class="qq">One quote class or two?</div><div class="rec"><b>Recommended: two</b> (<code>open_quote</code>, <code>close_quote</code>), because different objects follow each.</div></div></div>
+    <div class="q"><div><div class="qq">Is the semicolon "ends a command", not "ends a line"?</div><div class="rec"><b>Recommended: yes.</b> <code>#include</code> ends at the line end, <code>}</code> ends a block, and the <code>;</code> inside <code>for ( ; ; )</code> gets its own class.</div></div></div>
+    <div class="q"><div><div class="qq">How are properties quad invents named?</div><div class="rec"><b>Recommended: extend your <code>cxx.</code> tree</b>, e.g. <code>cxx.namespace.std.cout.string.newline</code>, marked <code>ORIGIN=quad</code>.</div></div></div>
+  </div>
+</section>
+
+<footer>From <code>PLAN.md</code> and <code>HOW_QUAD_WRITES.md</code> on branch <code>claude/inspiring-davinci-rjk4rx</code> (commit 077ed37). Everything marked Proposed waits on your decision.</footer>
+</main>
+</div>
+</body>
+</html>
